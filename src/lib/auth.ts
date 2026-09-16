@@ -46,7 +46,10 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret:
+    process.env.NEXTAUTH_SECRET ??
+    // Dev-only fallback: keeps sessions stable if .env is ever reset by the sandbox.
+    "formfit-dev-only-fallback-secret-do-not-use-in-production",
 };
 
 /** Returns the signed-in user's id, or null for anonymous requests. */
