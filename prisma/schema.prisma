@@ -1,0 +1,60 @@
+// FormFit — physical health tracker schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  activities   Activity[]
+  analyses     FormAnalysis[]
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String // running | cycling | swimming | strength | yoga | basketball | soccer | tennis | hiit | walking | other
+  title       String
+  durationMin Int
+  intensity   String   @default("moderate") // light | moderate | hard
+  calories    Int      @default(0)
+  distanceKm  Float?
+  notes       String?
+  performedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([performedAt])
+  @@index([userId, performedAt])
+}
+
+model FormAnalysis {
+  id             String   @id @default(cuid())
+  sport          String // squat | deadlift | bench | running | golf | tennis_serve | basketball_shot | yoga | swimming | other
+  mediaType      String // photo | video
+  mediaPath      String // public url path e.g. /uploads/xxx.mp4
+  thumbPath      String? // public url path to preview thumbnail
+  score          Int      @default(0) // 0-100 AI form score
+  verdict        String   @default("")
+  strengths      String   @default("[]") // JSON string[]
+  improvements   String   @default("[]") // JSON string[]
+  drills         String   @default("[]") // JSON string[]
+  safetyWarnings String   @default("[]") // JSON string[]
+  frameNotes     String   @default("[]") // JSON { frame: string; note: string }[]
+  createdAt      DateTime @default(now())
+  userId         String?
+  user           User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
